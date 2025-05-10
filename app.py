@@ -19,6 +19,8 @@ def process_uploaded_file(uploaded_file):
 
     if 'Pouch Size' not in df.columns:
         df['Pouch Size'] = None
+    if 'ASIN' not in df.columns:
+        df['ASIN'] = None
 
     df['Total Weight Sold (kg)'] = None
     current_parent = None
@@ -119,17 +121,19 @@ def generate_combined_pdf(packing_summary, combined_total, combined_loose, logo_
         pdf.cell(200, 8, f"Target: {total_weight} kg | Packed: {packed_weight:.2f} kg | Loose: {loose_weight:.2f} kg", ln=True)
         
         pdf.set_font("Arial", size=10)
-        pdf.cell(40, 8, "Variation (kg)", border=1)
-        pdf.cell(50, 8, "Pouch Size", border=1)
-        pdf.cell(40, 8, "Packets", border=1)
-        pdf.cell(50, 8, "Packed (kg)", border=1)
+        pdf.cell(30, 8, "Variation", border=1)
+        pdf.cell(35, 8, "Pouch Size", border=1)
+        pdf.cell(45, 8, "ASIN", border=1)
+        pdf.cell(30, 8, "Packets", border=1)
+        pdf.cell(40, 8, "Packed (kg)", border=1)
         pdf.ln()
 
         for _, row in variations.iterrows():
-            pdf.cell(40, 8, f"{row['Variation (kg)']}", border=1)
-            pdf.cell(50, 8, str(row['Pouch Size']), border=1)
-            pdf.cell(40, 8, f"{int(row['Packets to Pack'])}", border=1)
-            pdf.cell(50, 8, f"{row['Weight Packed (kg)']:.2f}", border=1)
+            pdf.cell(30, 8, f"{row['Variation (kg)']}", border=1)
+            pdf.cell(35, 8, str(row['Pouch Size']), border=1)
+            pdf.cell(45, 8, str(row['ASIN']), border=1)
+            pdf.cell(30, 8, f"{int(row['Packets to Pack'])}", border=1)
+            pdf.cell(40, 8, f"{row['Weight Packed (kg)']:.2f}", border=1)
             pdf.ln()
         
         pdf.ln(5)
@@ -199,7 +203,8 @@ else:
                 variations.append({
                     'Variation (kg)': float(label),
                     'Contribution %': df_full.at[i, 'Contribution %'],
-                    'Pouch Size': df_full.at[i, 'Pouch Size']
+                    'Pouch Size': df_full.at[i, 'Pouch Size'],
+                    'ASIN': df_full.at[i, 'ASIN']
                 })
 
             result = []
@@ -210,6 +215,7 @@ else:
                 result.append({
                     'Variation (kg)': var['Variation (kg)'],
                     'Pouch Size': var['Pouch Size'],
+                    'ASIN': var['ASIN'],
                     'Packets to Pack': packets,
                     'Weight Packed (kg)': weight_packed
                 })
@@ -220,7 +226,7 @@ else:
             packed_weight = result_df['Weight Packed (kg)'].sum()
             loose_weight = target_weight - packed_weight
 
-            st.dataframe(result_df[['Variation (kg)', 'Pouch Size', 'Packets to Pack', 'Weight Packed (kg)']])
+            st.dataframe(result_df[['Variation (kg)', 'Pouch Size', 'ASIN', 'Packets to Pack', 'Weight Packed (kg)']])
 
             packing_summary.append({
                 'item': selected_item,
